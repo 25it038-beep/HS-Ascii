@@ -1,0 +1,1 @@
+export default { content: ['./index.html','./src/**/*.{ts,tsx}'], theme:{ extend:{ colors:{ obsidian:'#090909', gold:'#D6B875'} } }, plugins:[] }

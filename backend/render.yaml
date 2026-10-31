@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: hs-ascii-live
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: MAX_CONCURRENT_CLIENTS
+        value: 100
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 60
+      - key: DEFAULT_FPS
+        value: 10
