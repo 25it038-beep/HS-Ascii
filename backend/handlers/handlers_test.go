@@ -59,8 +59,8 @@ func TestListHandler(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &list); err != nil {
 		t.Fatalf("failed to decode json: %v", err)
 	}
-	if len(list) < 180 {
-		t.Fatalf("expected >= 180 animations in /list, got %d", len(list))
+	if len(list) < 300 {
+		t.Fatalf("expected >= 300 animations in /list, got %d", len(list))
 	}
 }
 
@@ -78,8 +78,8 @@ func TestAnimationsAPI(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &list); err != nil {
 		t.Fatalf("failed to decode json: %v", err)
 	}
-	if len(list) < 180 {
-		t.Fatalf("expected >= 180 animations in /api/animations, got %d", len(list))
+	if len(list) < 300 {
+		t.Fatalf("expected >= 300 animations in /api/animations, got %d", len(list))
 	}
 }
 
@@ -98,8 +98,8 @@ func TestStatsAPI(t *testing.T) {
 		t.Fatalf("failed to decode json: %v", err)
 	}
 	total, ok := stats["total_animations"].(float64)
-	if !ok || int(total) < 180 {
-		t.Fatalf("expected total_animations >= 180, got %v", stats["total_animations"])
+	if !ok || int(total) < 300 {
+		t.Fatalf("expected total_animations >= 300, got %v", stats["total_animations"])
 	}
 }
 

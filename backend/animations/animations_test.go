@@ -11,8 +11,9 @@ func TestRegisterAll(t *testing.T) {
 	RegisterAll(r)
 
 	anims := r.List()
-	if len(anims) < 180 {
-		t.Fatalf("expected at least 180 animations, got %d", len(anims))
+	t.Logf("TOTAL REGISTERED ANIMATIONS: %d", len(anims))
+	if len(anims) < 300 {
+		t.Fatalf("expected at least 300 animations, got %d", len(anims))
 	}
 
 	categories := make(map[string]int)
@@ -31,8 +32,8 @@ func TestRegisterAll(t *testing.T) {
 		// Test frame rendering for multiple frames
 		for _, frameNum := range []int{0, 1, 5, 12, 45, 99} {
 			frame := a.NextFrame(engine.AnimationOptions{
-				Width:  40,
-				Height: 15,
+				Width:  80,
+				Height: 24,
 			}, frameNum)
 
 			if frame.Content == "" {
@@ -53,8 +54,8 @@ func TestRegisterAll(t *testing.T) {
 		}
 
 		largeFrame := a.NextFrame(engine.AnimationOptions{
-			Width:  80,
-			Height: 30,
+			Width:  120,
+			Height: 35,
 		}, 3)
 		if largeFrame.Content == "" {
 			t.Errorf("animation %s produced empty content for large frame", a.Name())
@@ -64,6 +65,7 @@ func TestRegisterAll(t *testing.T) {
 	expectedCategories := []string{
 		"characters", "space", "nature", "technology", "abstract",
 		"symbols", "hsai", "gaming", "vehicles", "creatures",
+		"music", "sports", "cyberpunk", "food", "weather",
 	}
 
 	for _, cat := range expectedCategories {
@@ -80,10 +82,11 @@ func TestPatterns(t *testing.T) {
 		"cube", "donut", "dna", "earth", "spiral", "matrix", "equalizer", "rocket",
 		"neural", "radar", "blackhole", "vehicle", "hsai", "wings", "symbol",
 		"heart", "fire", "waves", "rain", "particles", "stars", "clock", "rotate", "bounce",
+		"piano", "vinyl", "city", "coffee", "sports", "tux", "pokeball", "tornado", "disco",
 	}
 
 	for _, p := range patterns {
-		content := generatePattern(p, 40, 15, 0, 123, p)
+		content := generatePattern(p, 80, 24, 0, 123, p)
 		if content == "" {
 			t.Errorf("pattern %s generated empty content", p)
 		}
