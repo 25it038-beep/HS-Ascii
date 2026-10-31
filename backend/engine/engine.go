@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"time"
 )
 
@@ -23,10 +24,16 @@ func StreamAnimation(ctx context.Context, w io.Writer, anim Animation, opts Anim
 		if err != nil {
 			return err
 		}
-		// flush if possible
-		if f, ok := w.(interface{ Flush() error }); ok {
-			_ = f.Flush()
+		// flush immediately so streaming works through reverse proxies & Cloudflare
+		if rw, ok := w.(http.ResponseWriter); ok {
+			rc := http.NewResponseController(rw)
+			_ = rc.Flush()
+		} else if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		} else if f, ok := w.(interface{ Flush() }); ok {
+			f.Flush()
 		}
+
 		delay := SleepForFrame(frame, opts)
 		frameNum++
 		select {
