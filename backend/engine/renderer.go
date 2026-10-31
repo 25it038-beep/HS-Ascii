@@ -6,20 +6,19 @@ import (
 )
 
 func RenderFrame(frame Frame, opts AnimationOptions) string {
-	// ANSI clear screen + home cursor
-	clear := "\x1b[2J\x1b[H"
+	// Home cursor to (1,1) so we overwrite in-place without clearing flicker
+	home := "\x1b[H"
 	content := frame.Content
 
 	// Apply color if requested
 	if opts.Color != "" {
-		// Simple color map
 		colorCode := colorToCode(opts.Color)
 		if colorCode != "" {
 			content = fmt.Sprintf("\x1b[%sm%s\x1b[0m", colorCode, content)
 		}
 	}
 
-	return clear + content
+	return home + content
 }
 
 func colorToCode(name string) string {
@@ -48,7 +47,6 @@ func SleepForFrame(frame Frame, opts AnimationOptions) time.Duration {
 	if fps <= 0 {
 		fps = 10
 	}
-	// speed multiplier
 	multiplier := 1.0
 	switch opts.Speed {
 	case "slow":

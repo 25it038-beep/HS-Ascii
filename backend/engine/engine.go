@@ -11,6 +11,22 @@ import (
 var GlobalRegistry = NewRegistry()
 
 func StreamAnimation(ctx context.Context, w io.Writer, anim Animation, opts AnimationOptions) error {
+	// Initial clear screen and hide cursor (\x1b[?25l)
+	_, _ = fmt.Fprint(w, "\x1b[?25l\x1b[2J\x1b[H")
+	if rw, ok := w.(http.ResponseWriter); ok {
+		rc := http.NewResponseController(rw)
+		_ = rc.Flush()
+	}
+
+	defer func() {
+		// Restore cursor (\x1b[?25h) on disconnect
+		_, _ = fmt.Fprint(w, "\x1b[?25h\r\n")
+		if rw, ok := w.(http.ResponseWriter); ok {
+			rc := http.NewResponseController(rw)
+			_ = rc.Flush()
+		}
+	}()
+
 	frameNum := 0
 	for {
 		select {

@@ -83,11 +83,11 @@ func TestPatterns(t *testing.T) {
 	}
 
 	for _, p := range patterns {
-		content := generatePattern(p, 40, 15, 0, 123)
+		content := generatePattern(p, 40, 15, 0, 123, p)
 		if content == "" {
 			t.Errorf("pattern %s generated empty content", p)
 		}
-		if !strings.Contains(content, p) {
+		if !strings.Contains(content, strings.ToUpper(p)) {
 			t.Errorf("pattern %s title missing from header", p)
 		}
 	}

@@ -1,6 +1,7 @@
 package animations
 
 import (
+	"fmt"
 	"hs-ascii-live/engine"
 	"strings"
 )
@@ -75,8 +76,8 @@ func (a *ProceduralAnimation) Description() string { return a.description }
 
 func (a *ProceduralAnimation) NextFrame(opts engine.AnimationOptions, frameNum int) engine.Frame {
 	seed := hashString(a.name)
-	w := 40
-	h := 15
+	w := 80
+	h := 24
 	if opts.Width > 0 {
 		w = opts.Width
 	}
@@ -90,7 +91,7 @@ func (a *ProceduralAnimation) NextFrame(opts engine.AnimationOptions, frameNum i
 		h = 5
 	}
 	pattern := patternForName(a.name)
-	content := generatePattern(pattern, w, h, frameNum, seed)
+	content := generatePattern(pattern, w, h, frameNum, seed, a.name)
 	return engine.Frame{Content: content, Delay: 0}
 }
 
@@ -193,8 +194,12 @@ func patternForName(name string) string {
 	return patterns[hashString(name)%len(patterns)]
 }
 
-func generatePattern(pattern string, w, h, frameNum, seed int) string {
-	grid := make([][]rune, h)
+func generatePattern(pattern string, w, h, frameNum, seed int, animName string) string {
+	gridH := h - 1
+	if gridH < 1 {
+		gridH = 1
+	}
+	grid := make([][]rune, gridH)
 	for i := range grid {
 		grid[i] = make([]rune, w)
 		for j := range grid[i] {
@@ -268,13 +273,42 @@ func generatePattern(pattern string, w, h, frameNum, seed int) string {
 		drawBounce(grid, frameNum, seed)
 	}
 
-	title := "HS ASCII LIVE - " + pattern
-	var sb strings.Builder
-	for i := 0; i < h; i++ {
-		sb.WriteString(string(grid[i]))
-		if i < h-1 {
-			sb.WriteString("\n")
+	nameDisplay := animName
+	if nameDisplay == "" {
+		nameDisplay = pattern
+	}
+	title := fmt.Sprintf("── HS ASCII LIVE: %s [%s] ──", strings.ToUpper(strings.ReplaceAll(nameDisplay, "-", " ")), strings.ToUpper(pattern))
+	if len(title) > w {
+		title = fmt.Sprintf("── HS ASCII LIVE: %s ──", strings.ToUpper(nameDisplay))
+	}
+	if len(title) > w {
+		title = "HS ASCII LIVE - " + strings.ToUpper(nameDisplay)
+	}
+	if len(title) > w && w >= 13 {
+		title = "HS ASCII LIVE"
+	} else if len(title) > w {
+		title = title[:w]
+	}
+
+	headerRow := make([]rune, w)
+	for j := range headerRow {
+		headerRow[j] = ' '
+	}
+	startCol := (w - len(title)) / 2
+	if startCol < 0 {
+		startCol = 0
+	}
+	for j, r := range title {
+		if startCol+j < w {
+			headerRow[startCol+j] = r
 		}
 	}
-	return title + "\n" + sb.String()
+
+	var sb strings.Builder
+	sb.WriteString(string(headerRow))
+	for i := 0; i < gridH; i++ {
+		sb.WriteString("\r\n")
+		sb.WriteString(string(grid[i]))
+	}
+	return sb.String()
 }
