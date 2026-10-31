@@ -29,6 +29,7 @@ func main() {
 	r.Use(rl.Middleware)
 
 	// API routes
+	r.HandleFunc("/", handlers.HelpHandler).Methods("GET")
 	r.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	r.HandleFunc("/help", handlers.HelpHandler).Methods("GET")
 	r.HandleFunc("/list", handlers.ListHandler).Methods("GET")
