@@ -10,24 +10,40 @@ func RegisterAll(r *engine.Registry) {
 	categories := map[string][]string{
 		"characters": {
 			"rickroll", "dancing-rick", "pikachu", "cat", "dog", "among-us", "pacman", "mario", "sonic", "skull", "ghost", "dancing-stickman", "robot", "alien", "spider", "ninja", "samurai", "viking", "pirate", "wizard",
+			"batman", "superman", "ironman", "spiderman", "yoda", "darth-vader", "gandalf", "cyber-ninja",
 		},
 		"space": {
 			"galaxy", "milky-way", "blackhole", "solar-system", "rotating-earth", "moon-phases", "saturn", "shooting-stars", "meteor-shower", "supernova", "wormhole", "spaceship", "rocket-launch", "astronaut", "ufo", "comet", "asteroid-belt", "nebula", "constellation", "milky-way2",
+			"jupiter-storm", "pulsar", "quasars", "rings-of-uranus", "solar-eclipse", "deep-space-probe",
 		},
 		"nature": {
 			"fire", "waterfall", "ocean-waves", "rain", "thunderstorm", "tornado", "snowfall", "forest", "blooming-flowers", "sunrise", "sunset", "volcano", "lightning", "wind", "geyser", "aurora", "cave", "river",
+			"blizzard", "autumn-leaves", "desert-dunes", "coral-reef", "bamboo-forest", "meteor-impact",
 		},
 		"technology": {
 			"matrix-rain", "hacking-terminal", "computer-boot", "digital-glitch", "network-connections", "binary-rain", "ai-neural-network", "circuit-board", "cpu-processing", "gpu-rendering", "data-streams", "cyber-grid", "digital-face", "quantum-computing", "ai-brain", "encryption", "quantum-teleport", "hologram", "server-farm", "drone-swarm",
+			"blockchain-mining", "cyber-skull", "radar-scanner", "synthwave-sun", "laser-grid", "terminal-matrix",
 		},
 		"abstract": {
 			"rotating-cube", "3d-sphere", "spinning-donut", "dna-helix", "fractal", "tunnel", "particle-explosion", "kaleidoscope", "infinity-loop", "waves", "spiral", "morphing-shapes", "vortex", "optical-illusion", "meta-cube", "fractal-2", "spiral-2",
+			"hypercube-tesseract", "lissajous-curve", "torus-knot", "sine-wave-field", "sacred-geometry", "quantum-foam",
 		},
 		"symbols": {
 			"animated-heart", "broken-heart", "smiley", "crying-face", "fire-heart", "music-notes", "equalizer", "hourglass", "loading-animation", "countdown", "digital-clock", "pulse", "blink",
+			"yin-yang", "peace-sign", "radioactive-hazard", "biohazard", "infinity-symbol", "audio-bars",
 		},
 		"hsai": {
 			"hs-ai-solutions-logo", "hs-ai-studio", "gravity-ai", "galaxy-vision", "hs-ai-neural-network", "ai-model-training", "ai-agent", "hs-ai-core", "hs-digital-universe", "hs-ascii-live-intro", "hs-core-v2", "vision-alpha",
+			"hs-superintelligence", "hs-agentic-flow", "hs-neural-matrix", "hs-deep-thought", "hs-galaxy-core",
+		},
+		"gaming": {
+			"space-invaders", "pong", "tetris", "flappy-bird", "dino-runner", "snake-game", "doom-fire", "arcade-joystick", "gameboy", "zelda-triforce",
+		},
+		"vehicles": {
+			"cybertruck", "speeding-car", "steam-locomotive", "airplane-flight", "submarine", "motorcycle", "helicopter", "hovercraft", "sailing-ship", "space-shuttle",
+		},
+		"creatures": {
+			"roaring-lion", "dragon-flight", "phoenix-rising", "flying-bat", "swimming-whale", "hopping-frog", "galloping-horse", "slithering-snake", "flapping-butterfly", "howling-wolf",
 		},
 	}
 
@@ -53,8 +69,8 @@ func NewProceduralAnimation(name, category string) *ProceduralAnimation {
 	}
 }
 
-func (a *ProceduralAnimation) Name() string { return a.name }
-func (a *ProceduralAnimation) Category() string { return a.category }
+func (a *ProceduralAnimation) Name() string        { return a.name }
+func (a *ProceduralAnimation) Category() string    { return a.category }
 func (a *ProceduralAnimation) Description() string { return a.description }
 
 func (a *ProceduralAnimation) NextFrame(opts engine.AnimationOptions, frameNum int) engine.Frame {
@@ -66,6 +82,12 @@ func (a *ProceduralAnimation) NextFrame(opts engine.AnimationOptions, frameNum i
 	}
 	if opts.Height > 0 {
 		h = opts.Height
+	}
+	if w < 10 {
+		w = 10
+	}
+	if h < 5 {
+		h = 5
 	}
 	pattern := patternForName(a.name)
 	content := generatePattern(pattern, w, h, frameNum, seed)
@@ -80,33 +102,94 @@ func hashString(s string) int {
 	if h < 0 {
 		h = -h
 	}
+	if h < 0 { // math.MinInt
+		h = 0
+	}
 	return h
 }
 
+func mod(n, m int) int {
+	if m <= 0 {
+		return 0
+	}
+	r := n % m
+	if r < 0 {
+		r += m
+	}
+	return r
+}
+
 func patternForName(name string) string {
-	// priority mappings
+	n := strings.ToLower(name)
 	switch {
-	case strings.Contains(name, "heart"):
+	case strings.Contains(n, "pacman"):
+		return "pacman"
+	case strings.Contains(n, "cat"):
+		return "cat"
+	case strings.Contains(n, "stickman") || strings.Contains(n, "rick") || strings.Contains(n, "dance"):
+		return "dancer"
+	case strings.Contains(n, "skull") || strings.Contains(n, "ghost"):
+		return "ghost"
+	case strings.Contains(n, "invader"):
+		return "space-invaders"
+	case strings.Contains(n, "pong"):
+		return "pong"
+	case strings.Contains(n, "tetris"):
+		return "tetris"
+	case strings.Contains(n, "snake"):
+		return "snake"
+	case strings.Contains(n, "donut") || strings.Contains(n, "torus"):
+		return "donut"
+	case strings.Contains(n, "cube") || strings.Contains(n, "tesseract"):
+		return "cube"
+	case strings.Contains(n, "dna") || strings.Contains(n, "helix"):
+		return "dna"
+	case strings.Contains(n, "matrix") || strings.Contains(n, "terminal") || strings.Contains(n, "binary") || strings.Contains(n, "code"):
+		return "matrix"
+	case strings.Contains(n, "equalizer") || strings.Contains(n, "music") || strings.Contains(n, "audio"):
+		return "equalizer"
+	case strings.Contains(n, "rocket") || strings.Contains(n, "spaceship") || strings.Contains(n, "shuttle") || strings.Contains(n, "probe"):
+		return "rocket"
+	case strings.Contains(n, "earth") || strings.Contains(n, "globe") || strings.Contains(n, "sphere") || strings.Contains(n, "moon") || strings.Contains(n, "saturn") || strings.Contains(n, "planet"):
+		return "earth"
+	case strings.Contains(n, "car") || strings.Contains(n, "truck") || strings.Contains(n, "vehicle") || strings.Contains(n, "locomotive") || strings.Contains(n, "motorcycle") || strings.Contains(n, "submarine") || strings.Contains(n, "flight") || strings.Contains(n, "helicopter") || strings.Contains(n, "ship"):
+		return "vehicle"
+	case strings.Contains(n, "neural") || strings.Contains(n, "brain") || strings.Contains(n, "network") || strings.Contains(n, "agent") || strings.Contains(n, "model") || strings.Contains(n, "connect"):
+		return "neural"
+	case strings.Contains(n, "radar") || strings.Contains(n, "scan"):
+		return "radar"
+	case strings.Contains(n, "blackhole") || strings.Contains(n, "wormhole") || strings.Contains(n, "vortex") || strings.Contains(n, "singularity"):
+		return "blackhole"
+	case strings.Contains(n, "hs-") || strings.Contains(n, "hsai") || strings.Contains(n, "gravity") || strings.Contains(n, "vision"):
+		return "hsai"
+	case strings.Contains(n, "dragon") || strings.Contains(n, "phoenix") || strings.Contains(n, "bird") || strings.Contains(n, "bat") || strings.Contains(n, "butterfly") || strings.Contains(n, "wing"):
+		return "wings"
+	case strings.Contains(n, "yin-yang") || strings.Contains(n, "peace") || strings.Contains(n, "hazard") || strings.Contains(n, "biohazard") || strings.Contains(n, "infinity"):
+		return "symbol"
+	case strings.Contains(n, "heart"):
 		return "heart"
-	case strings.Contains(name, "matrix") || strings.Contains(name, "binary") || strings.Contains(name, "rain"):
-		return "rain"
-	case strings.Contains(name, "fire") || strings.Contains(name, "volcano"):
+	case strings.Contains(n, "fire") || strings.Contains(n, "volcano") || strings.Contains(n, "doom") || strings.Contains(n, "flame"):
 		return "fire"
-	case strings.Contains(name, "water") || strings.Contains(name, "ocean") || strings.Contains(name, "wave"):
+	case strings.Contains(n, "water") || strings.Contains(n, "ocean") || strings.Contains(n, "wave") || strings.Contains(n, "river") || strings.Contains(n, "waterfall"):
 		return "waves"
-	case strings.Contains(name, "snow") || strings.Contains(name, "rain"):
+	case strings.Contains(n, "rain") || strings.Contains(n, "storm"):
+		return "rain"
+	case strings.Contains(n, "snow") || strings.Contains(n, "blizzard"):
 		return "particles"
-	case strings.Contains(name, "spiral") || strings.Contains(name, "vortex") || strings.Contains(name, "tunnel"):
+	case strings.Contains(n, "spiral") || strings.Contains(n, "tunnel"):
 		return "spiral"
-	case strings.Contains(name, "cube") || strings.Contains(name, "sphere") || strings.Contains(name, "donut"):
-		return "rotate"
-	case strings.Contains(name, "galaxy") || strings.Contains(name, "milky") || strings.Contains(name, "star"):
+	case strings.Contains(n, "galaxy") || strings.Contains(n, "milky") || strings.Contains(n, "star") || strings.Contains(n, "supernova") || strings.Contains(n, "nebula") || strings.Contains(n, "constellation") || strings.Contains(n, "meteor") || strings.Contains(n, "pulsar") || strings.Contains(n, "quasar") || strings.Contains(n, "eclipse"):
 		return "stars"
-	case strings.Contains(name, "clock") || strings.Contains(name, "countdown"):
+	case strings.Contains(n, "clock") || strings.Contains(n, "countdown") || strings.Contains(n, "time") || strings.Contains(n, "hourglass"):
 		return "clock"
 	}
-	// fallback: assign a pattern based on the name hash so every animation gets a distinct look
-	patterns := []string{"heart", "rain", "fire", "waves", "particles", "spiral", "rotate", "stars", "clock", "bounce"}
+
+	patterns := []string{
+		"pacman", "cat", "dancer", "ghost", "space-invaders", "pong", "tetris", "snake",
+		"cube", "donut", "dna", "earth", "spiral", "matrix", "equalizer", "rocket",
+		"neural", "radar", "blackhole", "vehicle", "hsai", "wings", "symbol",
+		"heart", "fire", "waves", "rain", "particles", "stars", "clock", "rotate", "bounce",
+	}
 	return patterns[hashString(name)%len(patterns)]
 }
 
@@ -119,6 +202,52 @@ func generatePattern(pattern string, w, h, frameNum, seed int) string {
 		}
 	}
 	switch pattern {
+	case "pacman":
+		drawPacman(grid, frameNum, seed)
+	case "cat":
+		drawCat(grid, frameNum, seed)
+	case "dancer":
+		drawDancer(grid, frameNum, seed)
+	case "ghost":
+		drawGhost(grid, frameNum, seed)
+	case "space-invaders":
+		drawSpaceInvaders(grid, frameNum, seed)
+	case "pong":
+		drawPong(grid, frameNum, seed)
+	case "tetris":
+		drawTetris(grid, frameNum, seed)
+	case "snake":
+		drawSnake(grid, frameNum, seed)
+	case "cube":
+		drawCube(grid, frameNum, seed)
+	case "donut":
+		drawDonut(grid, frameNum, seed)
+	case "dna":
+		drawDNA(grid, frameNum, seed)
+	case "earth":
+		drawEarth(grid, frameNum, seed)
+	case "spiral":
+		drawSpiral(grid, frameNum, seed)
+	case "matrix":
+		drawMatrix(grid, frameNum, seed)
+	case "equalizer":
+		drawEqualizer(grid, frameNum, seed)
+	case "rocket":
+		drawRocket(grid, frameNum, seed)
+	case "neural":
+		drawNeuralNetwork(grid, frameNum, seed)
+	case "radar":
+		drawRadar(grid, frameNum, seed)
+	case "blackhole":
+		drawBlackhole(grid, frameNum, seed)
+	case "vehicle":
+		drawVehicle(grid, frameNum, seed)
+	case "hsai":
+		drawHsAiLogo(grid, frameNum, seed)
+	case "wings":
+		drawWings(grid, frameNum, seed)
+	case "symbol":
+		drawSymbol(grid, frameNum, seed)
 	case "heart":
 		drawHeart(grid, frameNum, seed)
 	case "rain":
@@ -129,8 +258,6 @@ func generatePattern(pattern string, w, h, frameNum, seed int) string {
 		drawWaves(grid, frameNum, seed)
 	case "particles":
 		drawParticles(grid, frameNum, seed)
-	case "spiral":
-		drawSpiral(grid, frameNum, seed)
 	case "rotate":
 		drawRotate(grid, frameNum, seed)
 	case "stars":
@@ -140,7 +267,7 @@ func generatePattern(pattern string, w, h, frameNum, seed int) string {
 	default:
 		drawBounce(grid, frameNum, seed)
 	}
-	// Add title
+
 	title := "HS ASCII LIVE - " + pattern
 	var sb strings.Builder
 	for i := 0; i < h; i++ {
@@ -149,141 +276,5 @@ func generatePattern(pattern string, w, h, frameNum, seed int) string {
 			sb.WriteString("\n")
 		}
 	}
-	// prepend title line
 	return title + "\n" + sb.String()
-}
-
-func drawHeart(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	cx := w/2
-	cy := h/2
-	offset := frameNum % 4
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			dx := float64(x-cx+offset)
-			dy := float64(y-cy)
-			if (dx*dx+dy*dy-1)*(dx*dx+dy*dy-1) < 0.3 {
-				grid[y][x] = '♥'
-			}
-		}
-	}
-}
-
-func drawRain(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	for x := 0; x < w; x++ {
-		y := (frameNum + (x+seed)%h) % h
-		if y >=0 && y < h {
-			grid[y][x] = '|'
-		}
-	}
-}
-
-func drawFire(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	for y := h-1; y >=0; y-- {
-		for x := 0; x < w; x++ {
-			if (x+y+frameNum+seed)%7 == 0 {
-				grid[y][x] = '▲'
-			} else if (x+y+frameNum+seed)%5 == 0 {
-				grid[y][x] = '*'
-			}
-		}
-	}
-}
-
-func drawWaves(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	for x := 0; x < w; x++ {
-		offset := int(float64(frameNum+seed+x)*0.2)
-		if h/2 > 0 {
-			offset = offset % (h/2)
-		}
-		y := h/2 + offset
-		if y >=0 && y < h {
-			grid[y][x] = '~'
-		}
-	}
-}
-
-func drawParticles(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	for i:=0;i<w*h/10;i++ {
-		x := (frameNum*3 + i*seed) % w
-		y := (frameNum*2 + i*seed*7) % h
-		grid[y][x] = '.'
-	}
-}
-
-func drawSpiral(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	cx := w/2
-	cy := h/2
-	for i:=0;i<50;i++ {
-		angle := float64(i)*0.2 + float64(frameNum)*0.1
-		r := float64(i)*0.5
-		x := int(float64(cx) + r*float64(i%2))
-		y := int(float64(cy) + r*float64((i+seed)%2))
-		// simple approximation
-		_ = angle
-		if y>=0 && y<h && x>=0 && x<w {
-			grid[y][x] = '*'
-		}
-	}
-}
-
-func drawRotate(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	offset := frameNum % w
-	for y:=0;y<h;y++ {
-		for x:=0;x<w;x++ {
-			if (x+offset+seed)%(w/2)==0 || (y+offset+seed)%(h/2)==0 {
-				grid[y][x] = '#'
-			}
-		}
-	}
-}
-
-func drawStars(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	for i:=0;i<30;i++ {
-		x := (frameNum*5 + i*seed*3) % w
-		y := (frameNum*3 + i*seed*7) % h
-		grid[y][x] = '*'
-	}
-}
-
-func drawClock(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	sec := frameNum % 60
-	for i:=0;i<w;i++ {
-		grid[0][i] = '-'
-	}
-	for i:=0;i<h;i++ {
-		grid[i][0] = '|'
-		grid[i][w-1] = '|'
-	}
-	grid[h-1][w/2] = ' '
-	// seconds hand
-	angle := int(float64(sec)/60*360) % 360
-	grid[h/2+angle%h][w/2+angle%w] = '>'
-}
-
-func drawBounce(grid [][]rune, frameNum, seed int) {
-	h := len(grid)
-	w := len(grid[0])
-	x := (frameNum*2 + seed) % w
-	y := (frameNum*3) % h
-	if y>=0 && y<h && x>=0 && x<w {
-		grid[y][x] = 'O'
-	}
 }

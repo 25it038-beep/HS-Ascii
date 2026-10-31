@@ -115,12 +115,12 @@ func ListHandler(w http.ResponseWriter, r *http.Request) {
 
 func HelpHandler(w http.ResponseWriter, r *http.Request) {
 	help := `HS ASCII LIVE - Terminal Usage
-Usage: curl https://hs-ascii-live.onrender.com/<animation>
+Usage: curl https://hs-ascii-1.onrender.com/<animation>
 
 Examples:
-  curl https://hs-ascii-live.onrender.com/rick
-  curl https://hs-ascii-live.onrender.com/matrix?speed=fast&color=green
-  curl https://hs-ascii-live.onrender.com/random
+  curl https://hs-ascii-1.onrender.com/pacman
+  curl https://hs-ascii-1.onrender.com/matrix-rain?speed=fast&color=green
+  curl https://hs-ascii-1.onrender.com/random
 
 Endpoints:
   /<animation>        Stream animation
