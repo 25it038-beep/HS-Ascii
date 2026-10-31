@@ -3,6 +3,7 @@ package animations
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 func drawMatrix(grid [][]rune, frameNum, seed int) {
@@ -12,14 +13,14 @@ func drawMatrix(grid [][]rune, frameNum, seed int) {
 
 	for x := 0; x < w; x++ {
 		colSpeed := mod(x*7+seed, 3) + 1
-		colOffset := mod(x*13, h)
+		colOffset := mod(x*13+seed*5, h)
 		headY := mod(frameNum*colSpeed+colOffset, h+8)
 
 		for trail := 0; trail < 7; trail++ {
 			y := headY - trail
 			if y >= 0 && y < h {
 				if trail == 0 {
-					grid[y][x] = chars[mod(frameNum+x, len(chars))]
+					grid[y][x] = chars[mod(frameNum+x+seed, len(chars))]
 				} else if trail < 3 {
 					grid[y][x] = chars[mod(x*3+trail+frameNum, len(chars))]
 				} else if trail < 5 {
@@ -173,7 +174,7 @@ func drawNeuralNetwork(grid [][]rune, frameNum, seed int) {
 			ny := nodeSpacing * (n + 1)
 			allNodes[l][n] = nodePos{layerX[l], ny}
 			if ny < h && layerX[l] < w {
-				pulse := mod(frameNum+l+n, 3)
+				pulse := mod(frameNum+l+n+seed, 3)
 				if pulse == 0 {
 					grid[ny][layerX[l]] = '●'
 				} else {
@@ -189,7 +190,7 @@ func drawNeuralNetwork(grid [][]rune, frameNum, seed int) {
 				midX := (n1.x + n2.x) / 2
 				midY := (n1.y + n2.y) / 2
 				if midY >= 0 && midY < h && midX >= 0 && midX < w {
-					if mod(frameNum+l, 2) == 0 {
+					if mod(frameNum+l+seed, 2) == 0 {
 						grid[midY][midX] = '·'
 					} else {
 						grid[midY][midX] = '-'
@@ -236,7 +237,7 @@ func drawRadar(grid [][]rune, frameNum, seed int) {
 		}
 	}
 
-	angle := float64(frameNum) * 0.2
+	angle := float64(frameNum)*0.2 + float64(seed)*0.3
 	for r := 0.0; r < radius; r += 0.5 {
 		sx := int(cx + (r*math.Cos(angle))/0.55)
 		sy := int(cy + r*math.Sin(angle))
@@ -246,8 +247,8 @@ func drawRadar(grid [][]rune, frameNum, seed int) {
 	}
 
 	blips := [][2]int{
-		{int(cx + (radius*0.6*math.Cos(1.2))/0.55), int(cy + radius*0.6*math.Sin(1.2))},
-		{int(cx + (radius*0.8*math.Cos(3.4))/0.55), int(cy + radius*0.8*math.Sin(3.4))},
+		{int(cx + (radius*0.6*math.Cos(1.2+float64(seed)*0.1))/0.55), int(cy + radius*0.6*math.Sin(1.2+float64(seed)*0.1))},
+		{int(cx + (radius*0.8*math.Cos(3.4+float64(seed)*0.1))/0.55), int(cy + radius*0.8*math.Sin(3.4+float64(seed)*0.1))},
 	}
 	for _, b := range blips {
 		if b[1] >= 0 && b[1] < h && b[0] >= 0 && b[0] < w {
@@ -289,7 +290,7 @@ func drawBlackhole(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawVehicle(grid [][]rune, frameNum, seed int) {
+func drawVehicle(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := w / 2
@@ -301,6 +302,22 @@ func drawVehicle(grid [][]rune, frameNum, seed int) {
 		" -o-(_)--(_)-o- ",
 	}
 
+	if strings.Contains(animName, "cybertruck") {
+		car = []string{
+			"    /\\____      ",
+			"   /      \\____ ",
+			"  /            \\",
+			" -o-(_)----(_)-o-",
+		}
+	} else if strings.Contains(animName, "monster") {
+		car = []string{
+			"    .-----.     ",
+			"   /       \\    ",
+			" ==( [HS]  )=== ",
+			"  ( (O) ) ( (O) )",
+		}
+	}
+
 	startY := cy - len(car)/2
 	for i, line := range car {
 		y := startY + i
@@ -309,7 +326,7 @@ func drawVehicle(grid [][]rune, frameNum, seed int) {
 			for j, r := range line {
 				x := startX + j
 				if x >= 0 && x < w && r != ' ' {
-					if r == '_' && i == 2 {
+					if r == '_' && i == len(car)-1 {
 						spokes := []rune{'|', '/', '-', '\\'}
 						r = spokes[mod(frameNum, len(spokes))]
 					}
@@ -343,11 +360,16 @@ func drawVehicle(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawHsAiLogo(grid [][]rune, frameNum, seed int) {
+func drawHsAiLogo(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := w / 2
 	cy := h / 2
+
+	cleanName := strings.ToUpper(strings.ReplaceAll(animName, "-", " "))
+	if len(cleanName) > 22 {
+		cleanName = cleanName[:22]
+	}
 
 	status := ">>> ONLINE <<<"
 	if mod(frameNum, 4) < 2 {
@@ -355,14 +377,14 @@ func drawHsAiLogo(grid [][]rune, frameNum, seed int) {
 	}
 
 	logo := []string{
-		"+---------------------+",
-		"|   HS AI SOLUTIONS   |",
-		"|    .----. .----.    |",
-		"|   /  H   \\  S   \\   |",
-		"|   \\      /      /   |",
-		"|    '----' '----'    |",
-		fmt.Sprintf("|   %14s    |", status),
-		"+---------------------+",
+		"+--------------------------+",
+		fmt.Sprintf("|  %-24s|", cleanName),
+		"|      .----.  .----.      |",
+		"|     /  H   \\/  S   \\     |",
+		"|     \\      /\\      /     |",
+		"|      '----'  '----'      |",
+		fmt.Sprintf("|    %14s        |", status),
+		"+--------------------------+",
 	}
 
 	startY := cy - len(logo)/2
@@ -380,10 +402,10 @@ func drawHsAiLogo(grid [][]rune, frameNum, seed int) {
 	}
 
 	for y := 0; y < h; y++ {
-		if mod(y+frameNum, 3) == 0 {
+		if mod(y+frameNum+seed, 3) == 0 {
 			if w > 2 {
-				grid[y][1] = '0' + rune(mod(y+frameNum, 2))
-				grid[y][w-2] = '0' + rune(mod(y+frameNum+1, 2))
+				grid[y][1] = '0' + rune(mod(y+frameNum+seed, 2))
+				grid[y][w-2] = '0' + rune(mod(y+frameNum+seed+1, 2))
 			}
 		}
 	}

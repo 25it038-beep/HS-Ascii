@@ -3,6 +3,7 @@ package animations
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 func drawPiano(grid [][]rune, frameNum, seed int) {
@@ -114,9 +115,7 @@ func drawVinyl(grid [][]rune, frameNum, seed int) {
 	// Turntable tonearm from top-right to record
 	armEndX := int(cx + r*0.6/0.55)
 	armEndY := int(cy - r*0.4)
-	if armEndY >= 0 && armEndY < h && armEndX < w {
-		grid[armEndY][armEndX] = '▼' // needle cartridge
-	}
+	setCell(grid, armEndX, armEndY, '▼')
 }
 
 func drawCitySkyline(grid [][]rune, frameNum, seed int) {
@@ -249,9 +248,119 @@ func drawCoffee(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawSports(grid [][]rune, frameNum, seed int) {
+func drawSports(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
+	cx := w / 2
+	cy := h / 2
+
+	if strings.Contains(animName, "boxing") {
+		gloves := []string{
+			"     [##]====~      ~====[##]     ",
+			"    ( [POW] )        ( [BAM] )    ",
+			"     [##]====~      ~====[##]     ",
+		}
+		startY := cy - len(gloves)/2
+		for i, line := range gloves {
+			y := startY + i
+			startX := cx - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
+
+	if strings.Contains(animName, "golf") {
+		// Hole and flag on right
+		flagX := w - 10
+		for y := cy - 3; y <= cy+2; y++ {
+			setCell(grid, flagX, y, '|')
+		}
+		setCell(grid, flagX+1, cy-3, '>')
+		setCell(grid, flagX+2, cy-3, '>')
+		setCell(grid, flagX, cy+3, 'U') // hole cup
+		// Golfer
+		golfer := []string{
+			"   o   ",
+			"  /|\\--/", // swinging club
+			"  / \\  ",
+		}
+		startY := cy
+		for i, line := range golfer {
+			y := startY + i
+			startX := cx - 14
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		// Flying golf ball
+		gx := cx - 8 + mod(frameNum*3, 14)
+		gy := cy - int(math.Sin(float64(mod(frameNum*3, 14))/14.0*math.Pi)*6.0)
+		setCell(grid, gx, gy, 'o')
+		return
+	}
+
+	if strings.Contains(animName, "weightlifter") {
+		lifter := []string{
+			"  (O)========================(O)  ", // barbell
+			"             \\ o /                ",
+			"               |                  ",
+			"              / \\                 ",
+			"             <   >                ",
+		}
+		startY := cy - len(lifter)/2
+		for i, line := range lifter {
+			y := startY + i
+			startX := cx - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
+
+	if strings.Contains(animName, "skater") {
+		skater := []string{
+			"      \\o/      ",
+			"       |       ",
+			"      / \\      ",
+			"   o========o  ", // skateboard
+			"    O      O   ",
+		}
+		offsetY := 0
+		if mod(frameNum, 4) < 2 {
+			offsetY = -2 // kickflip jump
+		}
+		startY := cy - len(skater)/2 + offsetY
+		for i, line := range skater {
+			y := startY + i
+			startX := cx - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
+
+	if strings.Contains(animName, "baseball") {
+		batter := []string{
+			"     o   /",
+			"   --|--/  (BAT)",
+			"    / \\    ",
+		}
+		startY := cy - len(batter)/2
+		for i, line := range batter {
+			y := startY + i
+			startX := cx - 12
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		bx := cx - 6 + mod(frameNum*4, 18)
+		setCell(grid, bx, cy-2, '⚾')
+		return
+	}
 
 	// Parabolic ball trajectory
 	ballCycle := w - 8
@@ -280,21 +389,15 @@ func drawSports(grid [][]rune, frameNum, seed int) {
 	goalX := w - 6
 	goalTop := h / 3
 	for y := goalTop; y < h-1; y++ {
-		if goalX < w && y < h {
-			grid[y][goalX] = '|'
-			if goalX+3 < w {
-				grid[y][goalX+3] = '|'
-			}
-			if mod(y, 2) == 0 && goalX+1 < w && goalX+2 < w {
-				grid[y][goalX+1] = '#'
-				grid[y][goalX+2] = '#'
-			}
+		setCell(grid, goalX, y, '|')
+		setCell(grid, goalX+3, y, '|')
+		if mod(y, 2) == 0 {
+			setCell(grid, goalX+1, y, '#')
+			setCell(grid, goalX+2, y, '#')
 		}
 	}
 	for x := goalX; x <= goalX+3; x++ {
-		if x < w && goalTop < h {
-			grid[goalTop][x] = '='
-		}
+		setCell(grid, x, goalTop, '=')
 	}
 
 	// Ground turf line

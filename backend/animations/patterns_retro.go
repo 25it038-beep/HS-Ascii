@@ -2,6 +2,7 @@ package animations
 
 import (
 	"fmt"
+	"strings"
 )
 
 func drawPacman(grid [][]rune, frameNum, seed int) {
@@ -46,11 +47,30 @@ func drawPacman(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawCat(grid [][]rune, frameNum, seed int) {
+func drawCat(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := w / 2
 	cy := h / 2
+
+	if strings.Contains(animName, "pokeball") {
+		ball := []string{
+			"    .---.    ",
+			"   / (o) \\   ",
+			"  |===O===|  [GOTCHA!]",
+			"   \\     /   ",
+			"    '---'    ",
+		}
+		startY := cy - len(ball)/2
+		for i, line := range ball {
+			y := startY + i
+			startX := cx - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
 
 	tailChar := '/'
 	switch mod(frameNum, 4) {
@@ -89,42 +109,94 @@ func drawCat(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawDancer(grid [][]rune, frameNum, seed int) {
+func drawDancer(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := w / 2
 	cy := h / 2
 
-	poses := [][]string{
-		{
-			"   \\o/   ",
-			"    |    ",
-			"   / \\   ",
-		},
-		{
-			"    o/   ",
-			"   /|    ",
-			"   / \\   ",
-		},
-		{
-			"   \\o    ",
-			"    |\\   ",
-			"   / \\   ",
-		},
-		{
-			"   _o_   ",
-			"    |    ",
-			"   < >   ",
-		},
+	var poses [][]string
+
+	if strings.Contains(animName, "rick") {
+		lyrics := []string{
+			"♪ Never gonna give you up ♪",
+			"♪ Never gonna let you down ♪",
+			"♪ Never gonna run around ♪",
+			"♪ and desert you! ♪",
+		}
+		lyric := lyrics[mod(frameNum/4, len(lyrics))]
+		lx := cx - len(lyric)/2
+		ly := cy - 4
+		if ly >= 0 && ly < h {
+			for j, r := range lyric {
+				x := lx + j
+				if x >= 0 && x < w {
+					grid[ly][x] = r
+				}
+			}
+		}
+		poses = [][]string{
+			{
+				"  [o]   ",
+				" ~(|)=o ",
+				"  / \\   ",
+			},
+			{
+				"  [o]   ",
+				" o=(|)~ ",
+				"  / \\   ",
+			},
+			{
+				"  [o]   ",
+				" \\(|)/  ",
+				"  < >   ",
+			},
+		}
+	} else if strings.Contains(animName, "naruto") {
+		poses = [][]string{
+			{
+				"   _o__  ",
+				" =/|     ",
+				"  / \\    ",
+			},
+			{
+				"   _o__  ",
+				" ==/     ",
+				"  < >    ",
+			},
+		}
+	} else {
+		poses = [][]string{
+			{
+				"   \\o/   ",
+				"    |    ",
+				"   / \\   ",
+			},
+			{
+				"    o/   ",
+				"   /|    ",
+				"   / \\   ",
+			},
+			{
+				"   \\o    ",
+				"    |\\   ",
+				"   / \\   ",
+			},
+			{
+				"   _o_   ",
+				"    |    ",
+				"   < >   ",
+			},
+		}
 	}
 
-	pose := poses[mod(frameNum, len(poses))]
+	pose := poses[mod(frameNum+seed, len(poses))]
 	startY := cy - len(pose)/2
 
 	if startY+len(pose)+1 < h {
 		floorY := startY + len(pose) + 1
 		for x := 0; x < w; x++ {
-			if mod(x+frameNum, 2) == 0 {
+			if mod(x+frameNum+seed, 2) == 0 {
 				grid[floorY][x] = '='
 			} else {
 				grid[floorY][x] = '-'
@@ -144,22 +216,54 @@ func drawDancer(grid [][]rune, frameNum, seed int) {
 			}
 		}
 	}
+
+	if strings.Contains(animName, "disco") {
+		sparkles := []rune{'*', '+', '.', 'o', 'x'}
+		for s := 0; s < 6; s++ {
+			sx := mod(s*17+frameNum*3+seed*7, w)
+			sy := mod(s*7+frameNum+seed*3, h)
+			if grid[sy][sx] == ' ' {
+				grid[sy][sx] = sparkles[mod(frameNum+s, len(sparkles))]
+			}
+		}
+	}
 }
 
-func drawGhost(grid [][]rune, frameNum, seed int) {
+func drawGhost(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := w / 2
 	cy := h / 2
 
-	floatY := cy + (mod(frameNum, 3) - 1)
-	floatX := cx + (mod(frameNum, 5) - 2)
+	floatY := cy + (mod(frameNum+seed, 3) - 1)
+	floatX := cx + (mod(frameNum+seed*2, 5) - 2)
 
-	ghost := []string{
-		"  .-.  ",
-		" (o o) ",
-		" | O | ",
-		" ~~~~~ ",
+	var ghost []string
+	if strings.Contains(animName, "alien") {
+		ghost = []string{
+			" .---. ",
+			"( O.O )",
+			" \\_!_/ ",
+			"  / \\  ",
+		}
+	} else if strings.Contains(animName, "pacman") {
+		eyes := "o o"
+		if mod(frameNum, 4) < 2 {
+			eyes = "O O"
+		}
+		ghost = []string{
+			" .---. ",
+			fmt.Sprintf("| %s |", eyes),
+			"|     |",
+			"~V~V~V~",
+		}
+	} else {
+		ghost = []string{
+			"  .-.  ",
+			" (o o) ",
+			" | O | ",
+			" ~~~~~ ",
+		}
 	}
 
 	for i, line := range ghost {

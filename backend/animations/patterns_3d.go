@@ -1,7 +1,9 @@
 package animations
 
 import (
+	"fmt"
 	"math"
+	"strings"
 )
 
 type point3D struct {
@@ -75,11 +77,36 @@ func drawLine(grid [][]rune, x0, y0, x1, y1 int, ch rune) {
 	}
 }
 
-func drawCube(grid [][]rune, frameNum, seed int) {
+func drawCube(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := float64(w) / 2.0
 	cy := float64(h) / 2.0
+
+	if strings.Contains(animName, "minecraft") {
+		swing := mod(frameNum, 4)
+		pickRune := '/'
+		if swing >= 2 {
+			pickRune = '\\'
+		}
+		steve := []string{
+			"    .-----.    ",
+			"    | o o |    ",
+			"    |  -  |    ",
+			fmt.Sprintf("  ==[###]==%c", pickRune),
+			"    |  |  |    ",
+			"   [#]   [#]   ",
+		}
+		startY := int(cy) - len(steve)/2
+		for i, line := range steve {
+			y := startY + i
+			startX := int(cx) - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
 
 	// 8 vertices of a 3D cube
 	vertices := []point3D{
@@ -243,7 +270,7 @@ func drawDNA(grid [][]rune, frameNum, seed int) {
 	}
 }
 
-func drawEarth(grid [][]rune, frameNum, seed int) {
+func drawEarth(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := float64(w) / 2.0
@@ -256,7 +283,11 @@ func drawEarth(grid [][]rune, frameNum, seed int) {
 		r = 3
 	}
 
-	rot := float64(frameNum) * 0.15
+	rot := float64(frameNum)*0.15 + float64(seed)*0.2
+
+	isJupiter := strings.Contains(animName, "jupiter")
+	isMoon := strings.Contains(animName, "moon")
+	isMars := strings.Contains(animName, "mars")
 
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
@@ -265,33 +296,123 @@ func drawEarth(grid [][]rune, frameNum, seed int) {
 			dist := math.Sqrt(dx*dx + dy*dy)
 
 			if dist <= r {
-				// Longitude calculation with rotation
-				theta := math.Atan2(dy, dx)
 				lon := math.Asin(dx/r) + rot
 				lat := math.Asin(dy / r)
 
-				_ = theta
-				// Continents / features
-				v := math.Sin(lon*3) * math.Cos(lat*2)
-				if math.Abs(dist-r) < 0.6 {
-					grid[y][x] = 'O'
-				} else if v > 0.3 {
-					grid[y][x] = '#' // land
-				} else if v > -0.1 {
-					grid[y][x] = '~' // coast
+				if isJupiter {
+					// Cloud bands & Great Red Spot storm
+					bands := math.Sin(lat * 8.0)
+					if math.Abs(lat+0.3) < 0.2 && math.Abs(math.Sin(lon)) > 0.7 {
+						grid[y][x] = '@' // Great Red Spot storm
+					} else if bands > 0.2 {
+						grid[y][x] = '='
+					} else {
+						grid[y][x] = '~'
+					}
+				} else if isMoon {
+					// Moon craters
+					crater := math.Sin(lon*5) * math.Cos(lat*5)
+					if crater > 0.4 {
+						grid[y][x] = 'o'
+					} else if dx > 0 {
+						grid[y][x] = '.'
+					} else {
+						grid[y][x] = ' '
+					}
+				} else if isMars {
+					// Mars terrain
+					m := math.Sin(lon*4+lat*2) + math.Cos(lon*2)
+					if m > 0.3 {
+						grid[y][x] = '#'
+					} else {
+						grid[y][x] = '.'
+					}
 				} else {
-					grid[y][x] = '.' // ocean
+					v := math.Sin(lon*3) * math.Cos(lat*2)
+					if math.Abs(dist-r) < 0.6 {
+						grid[y][x] = 'O'
+					} else if v > 0.3 {
+						grid[y][x] = '#'
+					} else if v > -0.1 {
+						grid[y][x] = '~'
+					} else {
+						grid[y][x] = '.'
+					}
 				}
 			}
 		}
 	}
 }
 
-func drawSpiral(grid [][]rune, frameNum, seed int) {
+func drawSpiral(grid [][]rune, frameNum, seed int, animName string) {
 	h := len(grid)
 	w := len(grid[0])
 	cx := float64(w) / 2.0
 	cy := float64(h) / 2.0
+
+	if strings.Contains(animName, "megaman") {
+		megaman := []string{
+			"    .---.    ",
+			"   / [o] \\   ",
+			"  ==( [O] )=====> (BUSTER SHOT)",
+			"   /  |  \\   ",
+		}
+		startY := int(cy) - len(megaman)/2
+		for i, line := range megaman {
+			y := startY + i
+			startX := int(cx) - 8
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
+
+	if strings.Contains(animName, "portal") {
+		for a := 0.0; a < 2*math.Pi; a += 0.2 {
+			px := int(cx + 8.0*math.Cos(a)/0.55)
+			py := int(cy + 4.0*math.Sin(a))
+			setCell(grid, px, py, '@')
+		}
+		portal := []string{
+			"  [APERTURE]  ",
+			"  < PORTAL >  ",
+		}
+		startY := int(cy) - len(portal)/2
+		for i, line := range portal {
+			y := startY + i
+			startX := int(cx) - len(line)/2
+			for j, r := range line {
+				setCell(grid, startX+j, y, r)
+			}
+		}
+		return
+	}
+
+	if strings.Contains(animName, "mandelbrot") || strings.Contains(animName, "fractal") {
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				cr := (float64(x)-cx)/(float64(w)*0.25) - 0.5
+				ci := (float64(y)-cy)/(float64(h)*0.25)
+				zr, zi := 0.0, 0.0
+				iter := 0
+				for iter < 12 && zr*zr+zi*zi < 4.0 {
+					tmp := zr*zr - zi*zi + cr
+					zi = 2.0*zr*zi + ci
+					zr = tmp
+					iter++
+				}
+				if iter == 12 {
+					setCell(grid, x, y, '#')
+				} else if iter > 6 {
+					setCell(grid, x, y, '+')
+				} else if iter > 2 {
+					setCell(grid, x, y, '.')
+				}
+			}
+		}
+		return
+	}
 
 	maxPoints := 70
 	chars := []rune("*+o°.~-")

@@ -1,6 +1,7 @@
 package animations
 
 import (
+	"fmt"
 	"hs-ascii-live/engine"
 	"strings"
 	"testing"
@@ -94,4 +95,56 @@ func TestPatterns(t *testing.T) {
 			t.Errorf("pattern %s title missing from header", p)
 		}
 	}
+}
+
+func TestFindDuplicates(t *testing.T) {
+	r := engine.NewRegistry()
+	RegisterAll(r)
+
+	anims := r.List()
+	t.Logf("Total animations: %d", len(anims))
+
+	// Check name uniqueness
+	nameSeen := make(map[string]bool)
+	var exactDups []string
+	for _, a := range anims {
+		if nameSeen[a.Name()] {
+			exactDups = append(exactDups, a.Name())
+		}
+		nameSeen[a.Name()] = true
+	}
+	if len(exactDups) > 0 {
+		t.Logf("EXACT DUPLICATE NAMES (%d): %v", len(exactDups), exactDups)
+	}
+
+	// Check visual frame content uniqueness (strip header line)
+	contentMap := make(map[string][]string)
+	opts := engine.AnimationOptions{Width: 80, Height: 24}
+	for _, a := range anims {
+		f0 := a.NextFrame(opts, 0).Content
+		f5 := a.NextFrame(opts, 5).Content
+		// Strip first line (which is the title header)
+		lines0 := strings.Split(f0, "\r\n")
+		lines5 := strings.Split(f5, "\r\n")
+		body0 := ""
+		body5 := ""
+		if len(lines0) > 1 {
+			body0 = strings.Join(lines0[1:], "\n")
+		}
+		if len(lines5) > 1 {
+			body5 = strings.Join(lines5[1:], "\n")
+		}
+		sig := fmt.Sprintf("%s|||%s", body0, body5)
+		contentMap[sig] = append(contentMap[sig], a.Name())
+	}
+
+	totalVisualDups := 0
+	for sig, names := range contentMap {
+		_ = sig
+		if len(names) > 1 {
+			totalVisualDups += len(names) - 1
+			t.Logf("VISUAL DUPLICATES (%d sharing same art): %v", len(names), names)
+		}
+	}
+	t.Logf("TOTAL VISUAL DUPLICATES: %d", totalVisualDups)
 }
