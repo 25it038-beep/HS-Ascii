@@ -198,7 +198,11 @@ func drawWaves(grid [][]rune, frameNum, seed int) {
 	h := len(grid)
 	w := len(grid[0])
 	for x := 0; x < w; x++ {
-		y := h/2 + int((float64(frameNum+seed+x)*0.2)%float64(h/2))
+		offset := int(float64(frameNum+seed+x)*0.2)
+		if h/2 > 0 {
+			offset = offset % (h/2)
+		}
+		y := h/2 + offset
 		if y >=0 && y < h {
 			grid[y][x] = '~'
 		}
@@ -223,8 +227,8 @@ func drawSpiral(grid [][]rune, frameNum, seed int) {
 	for i:=0;i<50;i++ {
 		angle := float64(i)*0.2 + float64(frameNum)*0.1
 		r := float64(i)*0.5
-		x := int(cx + r*float64(i%2))
-		y := int(cy + r*float64((i+seed)%2))
+		x := int(float64(cx) + r*float64(i%2))
+		y := int(float64(cy) + r*float64((i+seed)%2))
 		// simple approximation
 		_ = angle
 		if y>=0 && y<h && x>=0 && x<w {
