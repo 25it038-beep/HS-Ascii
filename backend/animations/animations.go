@@ -84,7 +84,7 @@ func hashString(s string) int {
 }
 
 func patternForName(name string) string {
-	// return a pattern type based on name
+	// priority mappings
 	switch {
 	case strings.Contains(name, "heart"):
 		return "heart"
@@ -104,9 +104,10 @@ func patternForName(name string) string {
 		return "stars"
 	case strings.Contains(name, "clock") || strings.Contains(name, "countdown"):
 		return "clock"
-	default:
-		return "bounce"
 	}
+	// fallback: assign a pattern based on the name hash so every animation gets a distinct look
+	patterns := []string{"heart", "rain", "fire", "waves", "particles", "spiral", "rotate", "stars", "clock", "bounce"}
+	return patterns[hashString(name)%len(patterns)]
 }
 
 func generatePattern(pattern string, w, h, frameNum, seed int) string {
