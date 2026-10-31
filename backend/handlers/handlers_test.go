@@ -45,6 +45,20 @@ func TestHelpHandler(t *testing.T) {
 	}
 }
 
+func TestDefaultIntroHandler(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	req := httptest.NewRequest("GET", "/?fps=30", nil).WithContext(ctx)
+	w := httptest.NewRecorder()
+	DefaultIntroHandler(w, req)
+
+	body := w.Body.String()
+	if !strings.Contains(body, "HS ASCII LIVE") {
+		t.Fatalf("expected default intro stream to contain header, got: %s", body)
+	}
+}
+
 func TestListHandler(t *testing.T) {
 	req := httptest.NewRequest("GET", "/list", nil)
 	w := httptest.NewRecorder()

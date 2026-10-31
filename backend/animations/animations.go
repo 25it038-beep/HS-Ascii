@@ -76,6 +76,12 @@ func RegisterAll(r *engine.Registry) {
 			r.Register(anim)
 		}
 	}
+
+	// Register Cinematic Experience as official intro and cinematic animation
+	cineNames := []string{"intro", "cinematic", "cinema", "hs-cinematic", "cinematic-intro", "hs-ascii-live-intro"}
+	for _, cn := range cineNames {
+		r.Register(NewCinematicAnimation(cn))
+	}
 }
 
 type ProceduralAnimation struct {

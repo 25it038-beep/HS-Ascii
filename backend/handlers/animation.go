@@ -21,6 +21,39 @@ func muxVars(r *http.Request) map[string]string {
 	return mux.Vars(r)
 }
 
+func DefaultIntroHandler(w http.ResponseWriter, r *http.Request) {
+	// If client specifically asks for help via query (?help or ?h)
+	if r.URL.Query().Get("help") != "" || r.URL.Query().Has("help") || r.URL.Query().Get("h") != "" {
+		HelpHandler(w, r)
+		return
+	}
+
+	anim, ok := engine.GlobalRegistry.Get("intro")
+	if !ok {
+		anim, ok = engine.GlobalRegistry.Get("cinematic")
+		if !ok {
+			HelpHandler(w, r)
+			return
+		}
+	}
+
+	opts := parseOptions(r)
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.Header().Set("Connection", "keep-alive")
+
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
+
+	go func() {
+		<-r.Context().Done()
+		cancel()
+	}()
+
+	_ = engine.StreamAnimation(ctx, w, anim, opts)
+}
+
 func AnimationHandler(w http.ResponseWriter, r *http.Request) {
 	vars := muxVars(r)
 	name := vars["name"]
@@ -160,6 +193,8 @@ func HelpHandler(w http.ResponseWriter, r *http.Request) {
 Usage: curl https://hs-ascii-1.onrender.com/<animation>
 
 Examples:
+  curl https://hs-ascii-1.onrender.com/               (Default Cinematic Experience)
+  curl https://hs-ascii-1.onrender.com/intro          (HS AI Solutions Cinematic Intro)
   curl https://hs-ascii-1.onrender.com/pacman
   curl https://hs-ascii-1.onrender.com/matrix-rain?color=green
   curl https://hs-ascii-1.onrender.com/space-invaders?full=true
@@ -167,6 +202,8 @@ Examples:
   curl https://hs-ascii-1.onrender.com/random
 
 Endpoints:
+  /                   Play default cinematic intro animation
+  /intro, /cinematic  Play HS AI Solutions Cinematic Experience
   /<animation>        Stream continuous animation
   /random             Random animation
   /list               List animations

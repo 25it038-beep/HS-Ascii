@@ -29,9 +29,11 @@ func main() {
 	r.Use(rl.Middleware)
 
 	// API routes
-	r.HandleFunc("/", handlers.HelpHandler).Methods("GET")
+	r.HandleFunc("/", handlers.DefaultIntroHandler).Methods("GET")
 	r.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	r.HandleFunc("/help", handlers.HelpHandler).Methods("GET")
+	r.HandleFunc("/intro", handlers.DefaultIntroHandler).Methods("GET")
+	r.HandleFunc("/cinematic", handlers.DefaultIntroHandler).Methods("GET")
 	r.HandleFunc("/list", handlers.ListHandler).Methods("GET")
 	r.HandleFunc("/random", handlers.RandomHandler).Methods("GET")
 	r.HandleFunc("/api/animations", handlers.AnimationsAPI).Methods("GET")
